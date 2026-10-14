@@ -1,0 +1,8 @@
+tmp/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+*.local.json
+quotes-live.json

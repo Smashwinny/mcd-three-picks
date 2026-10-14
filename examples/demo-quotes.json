@@ -1,0 +1,11 @@
+{
+  "source": "synthetic-demo",
+  "storeName": "演示门店（虚构）",
+  "fulfillment": "演示到店自取",
+  "options": [
+    {"id": "demo-a", "name": "示例鸡肉堡餐", "amountFen": 2590, "quoteStatus": "demo-only"},
+    {"id": "demo-b", "name": "示例牛肉堡餐", "amountFen": 2990, "quoteStatus": "demo-only"},
+    {"id": "demo-c", "name": "示例鱼肉堡餐", "amountFen": 3290, "quoteStatus": "demo-only"},
+    {"id": "demo-d", "name": "示例超预算餐", "amountFen": 4590, "quoteStatus": "demo-only"}
+  ]
+}
