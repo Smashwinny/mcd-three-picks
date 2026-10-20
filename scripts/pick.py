@@ -20,7 +20,9 @@ def budget_fen(value):
         raise ValueError("预算必须是正数，最多保留两位小数") from None
 
 
-def choose(payload, budget, *, demo=False, now=None):
+def choose(payload, budget, *, demo=False, now=None, excluded=(), removed=()):
+    if type(budget) is not int or budget <= 0:
+        raise ValueError("预算必须是正整数分")
     if not isinstance(payload, dict) or not isinstance(payload.get("options"), list):
         raise ValueError("输入必须含 options 数组")
     if not payload.get("storeName") or not payload.get("fulfillment"):
@@ -32,6 +34,8 @@ def choose(payload, budget, *, demo=False, now=None):
         if payload.get("source") != "mcp-calculate-price":
             raise ValueError("真实模式只接受标记来自 MCP calculate-price 的报价")
         try:
+            if not isinstance(payload.get("quotedAt"), str):
+                raise ValueError
             stamp = datetime.fromisoformat(payload["quotedAt"].replace("Z", "+00:00"))
             if stamp.tzinfo is None:
                 raise ValueError
@@ -51,12 +55,25 @@ def choose(payload, budget, *, demo=False, now=None):
         if not isinstance(name, str) or not name.strip() or not isinstance(key, str) or not key:
             raise ValueError("餐单必须有非空字符串 id 和 name")
         expected = "demo-only" if demo else "official-quoted"
-        if option.get("quoteStatus") != expected or price > budget or key in seen:
+        tags = option.get("tags", [])
+        if not isinstance(tags, list) or any(not isinstance(t, str) for t in tags):
+            raise ValueError("tags 必须是文本数组")
+        if option.get("quoteStatus") != expected or price > budget or key in seen or key in removed or any(t in excluded for t in tags):
             continue
         seen.add(key)
         eligible.append(option)
-    # Three lowest-priced distinct submitted candidates; no global-optimum claim.
-    shortlist = sorted(eligible, key=lambda item: (item["amountFen"], item["id"]))[:3]
+    # Prefer different main courses, then fill remaining slots; no global-optimum claim.
+    ordered = sorted(eligible, key=lambda item: (item["amountFen"], item["id"]))
+    shortlist, kinds = [], set()
+    for item in ordered:
+        kind = next((t for t in item.get("tags", []) if t in {"chicken", "beef", "fish", "breakfast", "wrap"}), None)
+        if len(shortlist) < 3 and (kind is None or kind not in kinds):
+            shortlist.append(item)
+            if kind:
+                kinds.add(kind)
+    for item in ordered:
+        if len(shortlist) < 3 and item not in shortlist:
+            shortlist.append(item)
     if not shortlist:
         raise ValueError("没有预算内且符合报价状态的候选，请调整需求或重新核价")
     return {
@@ -91,6 +108,7 @@ def main():
     parser.add_argument("--demo", action="store_true", help="使用标注清楚的虚构数据")
     parser.add_argument("--input", type=Path, help="Agent 整理的当次核价 JSON")
     parser.add_argument("--budget", default="35", help="人民币元，例如 35.50")
+    parser.add_argument("--exclude", default="", help="排除偏好标签，逗号分隔：beef,spicy,iced,breakfast")
     parser.add_argument("--card", type=Path, help="输出 SVG 分享卡")
     args = parser.parse_args()
     try:
@@ -98,7 +116,10 @@ def main():
             raise ValueError("请选择 --demo 或用 --input 提交 MCP 核价结果")
         source = args.input or Path(__file__).resolve().parents[1] / "examples/demo-quotes.json"
         payload = json.loads(source.read_text(encoding="utf-8"))
-        result = choose(payload, budget_fen(args.budget), demo=args.demo)
+        excluded = [t.strip() for t in args.exclude.split(",") if t.strip()]
+        if any(t not in {"beef", "spicy", "iced", "breakfast"} for t in excluded):
+            raise ValueError("存在不支持的偏好标签")
+        result = choose(payload, budget_fen(args.budget), demo=args.demo, excluded=excluded)
         if args.card:
             share_card(result, args.card)
         print(json.dumps(result, ensure_ascii=False, indent=2))

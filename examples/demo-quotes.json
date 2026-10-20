@@ -1,11 +1,150 @@
 {
   "source": "synthetic-demo",
-  "storeName": "演示门店（虚构）",
+  "storeName": "灵感街演示餐厅（虚构）",
   "fulfillment": "演示到店自取",
   "options": [
-    {"id": "demo-a", "name": "示例鸡肉堡餐", "amountFen": 2590, "quoteStatus": "demo-only"},
-    {"id": "demo-b", "name": "示例牛肉堡餐", "amountFen": 2990, "quoteStatus": "demo-only"},
-    {"id": "demo-c", "name": "示例鱼肉堡餐", "amountFen": 3290, "quoteStatus": "demo-only"},
-    {"id": "demo-d", "name": "示例超预算餐", "amountFen": 4590, "quoteStatus": "demo-only"}
+    {
+      "id": "demo-a",
+      "name": "香酥鸡肉堡三件餐",
+      "amountFen": 2590,
+      "components": [
+        "香酥鸡肉堡",
+        "小份薯条",
+        "无糖可乐"
+      ],
+      "tags": [
+        "chicken",
+        "spicy",
+        "iced"
+      ],
+      "art": "chicken",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-b",
+      "name": "经典牛肉堡三件餐",
+      "amountFen": 2990,
+      "components": [
+        "经典牛肉堡",
+        "小份薯条",
+        "柠檬茶"
+      ],
+      "tags": [
+        "beef",
+        "iced"
+      ],
+      "art": "beef",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-c",
+      "name": "酥脆鱼肉堡三件餐",
+      "amountFen": 3290,
+      "components": [
+        "酥脆鱼肉堡",
+        "小份薯条",
+        "热红茶"
+      ],
+      "tags": [
+        "fish"
+      ],
+      "art": "fish",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-d",
+      "name": "双层牛肉分享餐",
+      "amountFen": 4590,
+      "components": [
+        "双层牛肉堡",
+        "中份薯条",
+        "无糖可乐"
+      ],
+      "tags": [
+        "beef",
+        "iced"
+      ],
+      "art": "beef",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-e",
+      "name": "照烧鸡肉暖心餐",
+      "amountFen": 2790,
+      "components": [
+        "照烧鸡肉堡",
+        "小份薯条",
+        "热红茶"
+      ],
+      "tags": [
+        "chicken"
+      ],
+      "art": "chicken",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-f",
+      "name": "轻松鸡肉卷餐",
+      "amountFen": 2390,
+      "components": [
+        "鸡肉蔬菜卷",
+        "小份薯条",
+        "冰柠檬茶"
+      ],
+      "tags": [
+        "wrap",
+        "chicken",
+        "iced"
+      ],
+      "art": "wrap",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-g",
+      "name": "吉士蛋早餐组合",
+      "amountFen": 1990,
+      "components": [
+        "吉士蛋早餐堡",
+        "薯饼",
+        "热豆浆"
+      ],
+      "tags": [
+        "breakfast"
+      ],
+      "art": "breakfast",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-h",
+      "name": "清爽鱼肉双件餐",
+      "amountFen": 2890,
+      "components": [
+        "鱼肉堡",
+        "热红茶"
+      ],
+      "tags": [
+        "fish"
+      ],
+      "art": "fish",
+      "quoteStatus": "demo-only"
+    },
+    {
+      "id": "demo-i",
+      "name": "辣味鸡肉卷三件餐",
+      "amountFen": 2690,
+      "components": [
+        "辣味鸡肉卷",
+        "小份薯条",
+        "无糖可乐"
+      ],
+      "tags": [
+        "wrap",
+        "chicken",
+        "spicy",
+        "iced"
+      ],
+      "art": "wrap",
+      "quoteStatus": "demo-only"
+    }
   ]
 }

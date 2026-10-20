@@ -1,0 +1,6 @@
+{
+  "name": "mcd-three-picks", "version": "0.2.0", "private": true, "type": "module",
+  "description": "预算内三选一，少一点纠结，多一点午餐的惊喜。",
+  "scripts": {"start": "node server.mjs", "test": "node --test tests/*.test.mjs", "check": "node --check docs/app.js && node --check docs/engine.js && node --check server.mjs"},
+  "engines": {"node": ">=22"}
+}

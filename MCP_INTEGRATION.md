@@ -1,55 +1,51 @@
-# MCP 集成说明
+# MCP 接入与证据
 
-## 服务与状态
+## 已实现并验证
 
-- 官方服务：`https://mcp.mcd.cn`，Streamable HTTP。
-- 鉴权：`Authorization: Bearer ${MCD_MCP_TOKEN}`，只在个人客户端配置。
-- 官方文档：https://github.com/M-China/mcd-mcp-server
-- **现状：代码与 Skill 流程已提供，尚未取得个人 Token；真实连接、Schema 和端到端工具调用未验证。下面是实现采用的调用设计，不是已完成调用记录。**
+2026-10-20，使用个人 Token 连接 `https://mcp.mcd.cn`，发现 **35 个工具**；实际调用 `now-time-info`、`query-nearby-stores`、`query-meals`、`query-meal-detail` 和 `calculate-price`。
 
-## Skill 使用的工具
+公开验收地点为上海人民广场，门店为“麦当劳上海黄浦华旭国际大厦餐厅”。读取 123 个在售餐品，首轮核价 6 份；筛选后候选包括 20.00 元、26.00 元、33.50 元餐单。另验证了不吃牛肉/辣味/冰饮时，选择实际热饮选项后重新核价。金额为 2026-10-20 17:58 左右快照，不是未来现价。
 
-- `now-time-info`：知道当前日期和时段。
-- `query-nearby-stores`：选择用户位置附近的门店。
-- `query-meals`：所选门店当时可售菜单。
-- `query-meal-detail`：套餐组件、规格和可换选项。
-- `calculate-price`：完整餐单的官方应付报价。
-- 外送可使用 `delivery-query-addresses` 和 `delivery-query-stores`，仅查询，不新增地址。
+详见 [verification.md](docs/verification.md) 和脱敏[结构化记录](docs/live-verification.json)。原始返回及个人配置仅存在被忽略的 `.env` 和 `tmp/`，公开记录不含用户地址、账号或凭证。
 
-第一版最多六个候选，逐一核价后交给确定性的预算筛选和随机抽选程序。查询和核价都为只读；没有写操作。遇到 401 停止并提示配置凭证，429 停止当轮操作并提示稍后重试，不能无限循环。
+## 实际调用链
 
-业务价值：减少用户面对大量菜单的选择负担，同时把“随便选一份”限制在当前可售、已核价、预算内的候选里。
+1. Streamable HTTP `initialize` → `notifications/initialized`；支持 JSON 与 SSE。凭证仅发送到固定官方 HTTPS 地址，重定向拒绝。
+2. `tools/list` 读取实际 Schema；`now-time-info` 验证连接和时段。
+3. `query-nearby-stores`：`beType=1, searchType=2, city, keyword`。只搜索用户提供的公开地点，不查询收藏餐厅和会员地址。
+4. `query-meals`：`storeCode, orderType=1, beType=1`。识别单人套餐并排除需随单购卡商品；当前仅到店自取，不传 `beCode`。
+5. `query-meal-detail`：读取真实套餐分组和默认子项，只使用服务返回的编码、数量和特制键。没有合规默认搭配则跳过。
+6. 用户不想要冰饮时，仅在当前分组中查找实际可选的热饮；没有可用选项就跳过，改变搭配必须重新核价。
+7. `calculate-price`：携带整份套餐的 `roundList`、默认特制和 `needTableware=false`。本次实测返回的 `price` 为整数分；其他字段不能照搬这个单位规则。
+8. 预算与标签筛选，主食多样性优先填充最多三个候选，用户自行选择或等概率抽选，再复制/导出卡片。应用不创建订单。
 
-## 输入格式
+`lib/mcp-client.mjs` 实现实际连接，`lib/meals.mjs` 实现可售套餐与核价，`server.mjs` 只监听 127.0.0.1 并限制 Host/Origin；浏览器不获得 Token。
 
-Agent 必须从**当次真实工具返回**提取数据并保存至被忽略的 `tmp/quotes-live.json`，不可凭示例填入“真实”字段。以下仅为格式示例，金额不能用来代表现价，时间必须替换为真实核价时间：
+401/403 停止并提示更新 Token，429 停止当轮操作，超时和连接失败不无限重试。公开演示使用静态文件，不运行个人账号后端。
+
+## 导入格式
+
+真实模式导出到被忽略的 `tmp/quotes-live.json`，示例如下（文本和金额仅说明格式，时间须使用实际当次核价时间）：
 
 ```json
 {
   "source": "mcp-calculate-price",
-  "storeName": "实际返回的门店名称",
+  "storeName": "实际门店名称",
   "fulfillment": "到店自取",
-  "quotedAt": "2026-10-14T12:00:00+08:00",
-  "options": [
-    {
-      "id": "当次餐单唯一编号",
-      "name": "实际返回并确认完整组成的餐单名称",
-      "components": ["主食及规格", "小食及规格", "饮品及规格"],
-      "amountFen": 0,
-      "quoteStatus": "official-quoted"
-    }
-  ]
+  "quotedAt": "2026-10-20T10:00:00Z",
+  "options": [{
+    "id": "实际套餐编码或当次餐单ID",
+    "name": "实际餐单名称",
+    "components": ["实际主食", "实际小食", "实际饮品"],
+    "tags": ["chicken", "iced"],
+    "amountFen": 2590,
+    "quoteStatus": "official-quoted"
+  }]
 }
 ```
 
-上例的 0 仅表示 JSON 整数类型示意，绝不代表真实免费餐。`amountFen` 须按实际返回字段的单位规范化；不同字段不能一概按同一单位处理。五分钟是本应用的展示限制，不是官方的价格保证。脚本仅信任输入方标记，不独立认证 MCP 响应。
+导入时验证预算、整数金额、来源类型和带时区的报价时间，排除未核价项与重复 ID。金额来源由输入方声明；浏览器与 Python CLI 不独立认证输入文件。菜单修改、报价超过五分钟均需重新核价，窗口不是官方价格保证。
 
-## 待完成的真实验收
+## 业务价值与限制
 
-1. 连接后的 `tools/list` 与输入 Schema 验证。
-2. 一家门店菜单、详情与三个候选餐单核价。
-3. 门店、方式、餐品变化后的重新核价。
-4. 无可用餐单、接口失败、报价超预算的真实处理。
-5. 保留不含凭证和个人信息的验收记录；完成后更新 README 与本说明。
-
-离线 Demo 及本地单元测试不能替代以上真实验收。
+减少面对大量菜单的决策负担，把随机选择约束在预算内及当前已核价候选中。当前每轮最多检查 8 个餐品，获得 6 个预算内报价后停止；不包含全量穷举、优惠券优化、购卡、预约或外送。文字标签不能替代过敏原信息。Node 本机链路、公开浏览器演示与合成测试分别记录，不混为同一种验证。

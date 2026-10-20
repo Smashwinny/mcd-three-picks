@@ -17,7 +17,7 @@ class PickerTests(unittest.TestCase):
 
     def test_budget_filter_and_draw(self):
         result = pick.choose(self.demo, 3000, demo=True)
-        self.assertEqual([x["id"] for x in result["shortlist"]], ["demo-a", "demo-b"])
+        self.assertEqual([x["id"] for x in result["shortlist"]], ["demo-g", "demo-f", "demo-a"])
         self.assertIn(result["chosen"], result["shortlist"])
 
     def test_demo_cannot_enter_live_mode(self):

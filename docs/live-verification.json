@@ -1,0 +1,122 @@
+{
+  "testedAt": "2026-10-20T09:58:59.700Z",
+  "store": {
+    "name": "麦当劳上海黄浦华旭国际大厦餐厅",
+    "code": "1450713",
+    "location": "公开地点：上海人民广场"
+  },
+  "protocol": "MCP Streamable HTTP",
+  "toolsDiscovered": 35,
+  "normal": {
+    "quotedAt": "2026-10-20T09:58:55.121Z",
+    "scope": {
+      "menuProducts": 123,
+      "productsInspected": 6,
+      "quoted": 6,
+      "skipped": 0
+    },
+    "picks": [
+      {
+        "image": "https://menu-img.mcd.cn/pcm/prod/menu/20260701/product/MS_9900011126_320.png",
+        "id": "9900011126",
+        "name": "酥脆无双套餐",
+        "amountFen": 2000,
+        "components": [
+          "麦麦脆汁鸡-琵琶腿",
+          "迷你薯条",
+          "无糖可口可乐中杯"
+        ],
+        "tags": [
+          "chicken",
+          "iced"
+        ],
+        "art": "chicken"
+      },
+      {
+        "image": "https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504971_320.png",
+        "id": "9900005449",
+        "name": "吉士汉堡包中套餐",
+        "amountFen": 2600,
+        "components": [
+          "吉士汉堡包",
+          "中薯条",
+          "可乐中杯"
+        ],
+        "tags": [
+          "beef",
+          "iced"
+        ],
+        "art": "beef"
+      },
+      {
+        "image": "https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504968_320.png",
+        "id": "9900005460",
+        "name": "麦香鱼中套餐",
+        "amountFen": 3350,
+        "components": [
+          "麦香鱼",
+          "中薯条",
+          "可乐中杯"
+        ],
+        "tags": [
+          "fish",
+          "iced"
+        ],
+        "art": "fish"
+      }
+    ]
+  },
+  "filtered": {
+    "quotedAt": "2026-10-20T09:58:57.631Z",
+    "picks": [
+      {
+        "image": "https://menu-img.mcd.cn/pcm/prod/menu/20260701/product/MS_9900011126_320.png",
+        "id": "9900011126",
+        "name": "酥脆无双套餐",
+        "amountFen": 2900,
+        "components": [
+          "麦麦脆汁鸡-琵琶腿",
+          "迷你薯条",
+          "麦咖啡™热美式中杯"
+        ],
+        "tags": [
+          "chicken"
+        ],
+        "art": "chicken"
+      },
+      {
+        "image": "https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900015602_320.png",
+        "id": "9900015602",
+        "name": "大堡口福三件套",
+        "amountFen": 3190,
+        "components": [
+          "Hold不住鸡排堡（椒盐风味）",
+          "中薯条",
+          "麦咖啡™热美式中杯"
+        ],
+        "tags": [
+          "chicken"
+        ],
+        "art": "chicken"
+      },
+      {
+        "image": "https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504969_320.png",
+        "id": "9900004835",
+        "name": "麦乐鸡经典中套餐",
+        "amountFen": 3600,
+        "components": [
+          "麦乐鸡5块",
+          "中薯条",
+          "热浓浓黑巧中杯"
+        ],
+        "tags": [
+          "chicken"
+        ],
+        "art": "chicken"
+      }
+    ]
+  },
+  "noPrivateAddressesUsed": true,
+  "writeOperations": 0,
+  "verificationScope": "Node HTTP endpoint end-to-end with official MCP; browser live flow not yet verified"
+}
