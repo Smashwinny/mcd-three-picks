@@ -4,6 +4,8 @@
 
 [打开免 Token 演示](https://smashwinny.github.io/mcd-three-picks/) · [真实 MCP 验收记录](docs/verification.md) · [接入说明](MCP_INTEGRATION.md) · [报名成功确认](https://github.com/M-China/mcd-developer-innovation-challenge/issues/691#issuecomment-6165770560)
 
+![桌面网页与抽选结果](docs/screenshots/desktop-demo.jpg)
+
 为选择困难的学生、打工人和单人用餐用户做的小工具。预算和“不想吃什么”确定后，只留下三个可能：可以自己点一份，也可以让随机抽选帮你结束纠结。支持下载一张午餐分享卡。
 
 > 非麦当劳官方产品，2026 MCP 创意开发大赛参赛作品。公开演示使用**明确标注的虚构数据**；本机模式已完成官方 MCP 选店、菜单、套餐详情和核价链路验收，详见记录。不自动下单，不申请 WorkBuddy 专项奖励。

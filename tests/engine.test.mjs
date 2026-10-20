@@ -1,12 +1,106 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
-import {budgetFen,validateQuotes,shortlist,randomIndex,shareSvg,MAX_AGE_MS} from '../docs/engine.js';
-const demo=JSON.parse(await readFile(new URL('../examples/demo-quotes.json',import.meta.url),'utf8'));
-test('budget uses exact integer fen and rejects invalid numbers',()=>{assert.equal(budgetFen('35.50'),3550);for(const text of ['0','-1','1.001','Infinity','NaN','1e2',''])assert.throws(()=>budgetFen(text));});
-test('shortlist respects budget, exclusions, removed IDs and diversity',()=>{const result=shortlist(demo,3500,['beef','spicy']);assert(result.shortlist.length===3);assert(result.shortlist.every(x=>x.amountFen<=3500&&!x.tags.includes('beef')&&!x.tags.includes('spicy')));const ids=result.shortlist.map(x=>x.id);assert(shortlist(demo,3500,[],ids).shortlist.every(x=>!ids.includes(x.id)));});
-test('empty shortlist never raises budget',()=>{assert.equal(shortlist(demo,100).shortlist.length,0);});
-test('source markers cannot cross modes and unknown quotes are excluded',()=>{const d=structuredClone(demo);d.source='invented';assert.throws(()=>validateQuotes(d));d.source='synthetic-demo';d.options[0].quoteStatus='official-quoted';assert(!validateQuotes(d).options.some(x=>x.id===d.options[0].id));});
-test('expired or future quotes, missing timezones and invalid values fail closed',()=>{const now=Date.now();const d=structuredClone(demo);d.source='mcp-calculate-price';for(const o of d.options)o.quoteStatus='official-quoted';d.quotedAt=new Date(now-1000).toISOString();assert(validateQuotes(d,now).options.length);for(const value of [new Date(now-MAX_AGE_MS-1).toISOString(),new Date(now+1).toISOString(),'2026-10-20T12:00:00',9]){d.quotedAt=value;assert.throws(()=>validateQuotes(d,now));}d.quotedAt=new Date(now).toISOString();d.options[0].amountFen=true;assert.throws(()=>validateQuotes(d,now));});
-test('deduplication and unsupported image hosts',()=>{const d=structuredClone(demo);d.options.push(structuredClone(d.options[0]));d.options[0].image='https://evil.example/photo.png';assert.equal(validateQuotes(d).options.length,demo.options.length);assert.equal(validateQuotes(d).options[0].image,null);});
-test('random draw rejects modulo bias rather than favoring first options',()=>{let call=0;const crypto={getRandomValues(a){a[0]=call++===0?0xffffffff:2;}};assert.equal(randomIndex(3,crypto),2);assert.equal(call,2);assert.throws(()=>randomIndex(0));});
-test('share card escapes untrusted markup and labels demos',()=>{const r=shortlist(demo,3500);r.storeName='<script>alert(1)</script>';const svg=shareSvg(r,r.shortlist[0]);assert(!svg.includes('<script>'));assert(svg.includes('&lt;script&gt;'));assert(svg.includes('虚构'));});
-test('public demo and CLI fixture are identical',async()=>{assert.deepEqual(JSON.parse(await readFile(new URL('../docs/data/demo-quotes.json',import.meta.url),'utf8')),demo);});
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import {
+  budgetFen,
+  validateQuotes,
+  shortlist,
+  randomIndex,
+  shareSvg,
+  MAX_AGE_MS,
+} from "../docs/engine.js";
+const demo = JSON.parse(
+  await readFile(
+    new URL("../examples/demo-quotes.json", import.meta.url),
+    "utf8",
+  ),
+);
+test("budget uses exact integer fen and rejects invalid numbers", () => {
+  assert.equal(budgetFen("35.50"), 3550);
+  for (const text of ["0", "-1", "1.001", "Infinity", "NaN", "1e2", ""])
+    assert.throws(() => budgetFen(text));
+});
+test("shortlist respects budget, exclusions, removed IDs and diversity", () => {
+  const result = shortlist(demo, 3500, ["beef", "spicy"]);
+  assert(result.shortlist.length === 3);
+  assert(
+    result.shortlist.every(
+      (x) =>
+        x.amountFen <= 3500 &&
+        !x.tags.includes("beef") &&
+        !x.tags.includes("spicy"),
+    ),
+  );
+  const ids = result.shortlist.map((x) => x.id);
+  assert(
+    shortlist(demo, 3500, [], ids).shortlist.every((x) => !ids.includes(x.id)),
+  );
+});
+test("empty shortlist never raises budget", () => {
+  assert.equal(shortlist(demo, 100).shortlist.length, 0);
+});
+test("source markers cannot cross modes and unknown quotes are excluded", () => {
+  const d = structuredClone(demo);
+  d.source = "invented";
+  assert.throws(() => validateQuotes(d));
+  d.source = "synthetic-demo";
+  d.options[0].quoteStatus = "official-quoted";
+  assert(!validateQuotes(d).options.some((x) => x.id === d.options[0].id));
+});
+test("expired or future quotes, missing timezones and invalid values fail closed", () => {
+  const now = Date.now();
+  const d = structuredClone(demo);
+  d.source = "mcp-calculate-price";
+  for (const o of d.options) o.quoteStatus = "official-quoted";
+  d.quotedAt = new Date(now - 1000).toISOString();
+  assert(validateQuotes(d, now).options.length);
+  for (const value of [
+    new Date(now - MAX_AGE_MS - 1).toISOString(),
+    new Date(now + 1).toISOString(),
+    "2026-10-20T12:00:00",
+    9,
+  ]) {
+    d.quotedAt = value;
+    assert.throws(() => validateQuotes(d, now));
+  }
+  d.quotedAt = new Date(now).toISOString();
+  d.options[0].amountFen = true;
+  assert.throws(() => validateQuotes(d, now));
+});
+test("deduplication and unsupported image hosts", () => {
+  const d = structuredClone(demo);
+  d.options.push(structuredClone(d.options[0]));
+  d.options[0].image = "https://evil.example/photo.png";
+  assert.equal(validateQuotes(d).options.length, demo.options.length);
+  assert.equal(validateQuotes(d).options[0].image, null);
+});
+test("random draw rejects modulo bias rather than favoring first options", () => {
+  let call = 0;
+  const crypto = {
+    getRandomValues(a) {
+      a[0] = call++ === 0 ? 0xffffffff : 2;
+    },
+  };
+  assert.equal(randomIndex(3, crypto), 2);
+  assert.equal(call, 2);
+  assert.throws(() => randomIndex(0));
+});
+test("share card escapes untrusted markup and labels demos", () => {
+  const r = shortlist(demo, 3500);
+  r.storeName = "<script>alert(1)</script>";
+  const svg = shareSvg(r, r.shortlist[0]);
+  assert(!svg.includes("<script>"));
+  assert(svg.includes("&lt;script&gt;"));
+  assert(svg.includes("虚构"));
+});
+test("public demo and CLI fixture are identical", async () => {
+  assert.deepEqual(
+    JSON.parse(
+      await readFile(
+        new URL("../docs/data/demo-quotes.json", import.meta.url),
+        "utf8",
+      ),
+    ),
+    demo,
+  );
+});
